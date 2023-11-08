@@ -22,23 +22,17 @@ def normalize(img):
 
                 
 def compress(img,bin_size):
+    img = np.array(img)
     dimx = len(img)
     dimy = len(img[0])
     rx = int(dimx / bin_size) 
     ry = int(dimy / bin_size) 
-    ret = np.zeros((rx,ry))
- 
-    for _x in range(rx):
-        for _y in range(ry):
-            x = _x * bin_size
-            y = _y * bin_size
-            if x + bin_size < dimx and y + bin_size <dimy :
-                ret[_x,_y] = np.mean(img[x:x + bin_size, y : y + bin_size])
-                
-    return ret
+   
+    shape = (rx,bin_size,ry,bin_size)        
+    return img.reshape(shape).mean(-1).mean(1)
 
 
-def center(img,n_draw = 1000000, u_thresh = 0.9,l_thresh = 0.4):
+def center(img,n_draw = 1000000, u_thresh = 1,l_thresh = 0.5):
     xs = []
 
     
@@ -61,9 +55,10 @@ def center(img,n_draw = 1000000, u_thresh = 0.9,l_thresh = 0.4):
     return ret[0],ret[1],xs
     
         
-binsize = 20
+binsize = 4
 scl = 300
-fetch = 150
+#fetch is the number of images you wish to combine
+fetch = 128
 
 
 
@@ -83,6 +78,13 @@ for i,img_path in enumerate(img_paths):
         ncimg = normalize(cimg)
         
         x,y,xs = center(ncimg)
+        
+        """
+        xs = np.array(xs)
+        plt.scatter(xs[:,0], xs[:,1])
+        plt.show()
+        """
+        
         x,y = int(x*binsize),int(y*binsize)
 
         snimg = nimg[x - scl:x + scl, y - scl:y+scl]
@@ -91,9 +93,6 @@ for i,img_path in enumerate(img_paths):
         del nimg
 
         
-    
-    
-    
     snimgs = np.array(snimgs)
     master_snimgs = snimgs.mean(axis = 0)
     color_channels += [np.asarray(master_snimgs)]
