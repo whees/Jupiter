@@ -32,7 +32,7 @@ def compress(img,bin_size):
     return img.reshape(shape).mean(-1).mean(1)
 
 
-def center(img,n_draw = 100000, u_thresh = 1,l_thresh = 0.5):
+def center(img,n_draw = 500000, u_thresh = 1,l_thresh = 0.5):
     xs = []
 
     
