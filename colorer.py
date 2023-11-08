@@ -54,11 +54,13 @@ def center(img,n_draw = 500_000, u_thresh = 1,l_thresh = 0.5):
         
     return ret[0],ret[1],xs
     
-        
+
+#binned arrays are easier to use for center detection
+#bin value must be a common divisor of original image dimensions
 binsize = 4
+#scl is half the size of your cropped centered image
 scl = 300
-#fetch is the number of images you wish to combine
-#this program has been tested up to 128 but it takes a while
+#fetch is the number of images you wish to combine (per color channel)
 fetch = 10
 
 
@@ -69,6 +71,7 @@ color_img = [[[0,0,0] for i in range(2 * scl)] for j in range(2 * scl)]
 color_channels = [] 
 
 for i,img_path in enumerate(img_paths):
+    print('working on',out_paths[i].lower(),'...')
     names = [img_path + img_name for e,img_name in enumerate(os.listdir(img_path)) if fnmatch.fnmatch(img_name,'Light_*.fit') and e < fetch]
     print('fetched %s file(s)'%(len(names)))
     snimgs = []
@@ -81,7 +84,7 @@ for i,img_path in enumerate(img_paths):
         x,y,xs = center(ncimg)
         
         
-        """ used to check if center detection is picking up noise
+        """ uncomment to check if center detection is picking up noise
         xs = np.array(xs)
         plt.scatter(xs[:,0], xs[:,1])
         plt.show()
@@ -110,7 +113,7 @@ for i in range(2 * scl):
         color_img[i][j][2] = int(255 * color_channels[0][i][j] ** 2)
      
 
-plt.imsave('img%s_l.png'%(fetch),np.uint8(np.array(color_img)))
+plt.imsave('img%s.png'%(fetch),np.uint8(np.array(color_img)))
 print('color image saved as','img%s.png'%(fetch))
 
 
