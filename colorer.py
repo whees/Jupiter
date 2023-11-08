@@ -58,6 +58,7 @@ def center(img,n_draw = 1000000, u_thresh = 1,l_thresh = 0.5):
 binsize = 4
 scl = 300
 #fetch is the number of images you wish to combine
+#this program has been tested up to 128 but it takes a while
 fetch = 128
 
 
@@ -79,7 +80,8 @@ for i,img_path in enumerate(img_paths):
         
         x,y,xs = center(ncimg)
         
-        """
+        
+        """ used to check if center detection is picking up noise
         xs = np.array(xs)
         plt.scatter(xs[:,0], xs[:,1])
         plt.show()
