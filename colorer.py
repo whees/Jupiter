@@ -61,7 +61,8 @@ binsize = 4
 #scl is half the size of your cropped centered image
 scl = 300
 #fetch is the number of images you wish to combine (per color channel)
-fetch = 10
+fetch = int(input('how many images per color channel?\n'))
+print('\n')
 
 
 
