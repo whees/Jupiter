@@ -62,9 +62,9 @@ binsize = 4
 scl = 300
 #nfetch is the number of images you wish to combine (per color channel)
 nfetch = int(input('number of images per color channel: '))
-p = int(input('centering power (ideal ~6): '))
+p = float(input('centering power (ideal ~6): '))
 print('\n')
-ndraw = 10**p
+ndraw = int(10**p)
 
 
 
@@ -116,8 +116,10 @@ for i in range(2 * scl):
         color_img[i][j][2] = int(255 * color_channels[0][i][j] ** 2)
      
 
-plt.imsave('img%s_pow%s.png'%(nfetch,p),np.uint8(np.array(color_img)))
-print('color image saved as','img%s_pow%s.png'%(nfetch,p))
+
+out_name = 'img%s_pow%s-%s.png'%(nfetch,int(p),int(round(p%1,1) * 10))
+plt.imsave(out_name,np.uint8(np.array(color_img)))
+print('color image saved as',out_name)
 
 
 
