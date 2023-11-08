@@ -32,7 +32,7 @@ def compress(img,bin_size):
     return img.reshape(shape).mean(-1).mean(1)
 
 
-def center(img,n_draw = 1000000, u_thresh = 1,l_thresh = 0.5):
+def center(img,n_draw = 100000, u_thresh = 1,l_thresh = 0.5):
     xs = []
 
     
@@ -59,7 +59,7 @@ binsize = 4
 scl = 300
 #fetch is the number of images you wish to combine
 #this program has been tested up to 128 but it takes a while
-fetch = 128
+fetch = 10
 
 
 
@@ -98,7 +98,7 @@ for i,img_path in enumerate(img_paths):
     snimgs = np.array(snimgs)
     master_snimgs = snimgs.mean(axis = 0)
     color_channels += [np.asarray(master_snimgs)]
-    print('done with',out_paths[i].lower())
+    print('done with',out_paths[i].lower(),'\n')
 
 
 
@@ -110,7 +110,7 @@ for i in range(2 * scl):
         color_img[i][j][2] = int(255 * color_channels[0][i][j] ** 2)
      
 
-plt.imsave('img%s.png'%(fetch),np.uint8(np.array(color_img)))
+plt.imsave('img%s_l.png'%(fetch),np.uint8(np.array(color_img)))
 print('color image saved as','img%s.png'%(fetch))
 
 
