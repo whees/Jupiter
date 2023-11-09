@@ -15,8 +15,7 @@ from tqdm import tqdm
 def normalize(img):
     ret = img - np.median(img)
     ret[ret<0] = 0
-    den = ret.max()
-    ret = ret / den
+    ret = ret / ret.max()
     
     return ret
 
@@ -60,22 +59,37 @@ def center(img,n_draw = 500_000, u_thresh = 1,l_thresh = 0.5):
 binsize = 4
 #scl is half the size of your cropped centered image
 scl = 300
+#color channels you wish to include
+colorstring =  input('include color(s) (ex. rgb): ')
 #nfetch is the number of images you wish to combine (per color channel)
-nfetch = int(input('number of images per color channel: '))
+nfetch = int(input('no. images per color channel: '))
 p = float(input('centering power (ideal ~6): '))
+#maps color letter to color name
+l2n = {'r':'reds','b':'blues','g':'greens'}
+
+colorkey = ''
+img_paths = []
+for letter in colorstring:
+    if letter.lower() == 'r' and 'r' not in colorkey:
+        colorkey += 'r'
+        img_paths += ['Jupiter/R_filter/Brights/2023-11-01_21_35_05Z/']
+    elif letter.lower() == 'g' and 'g' not in colorkey:
+        colorkey += 'g'
+        img_paths += ['Jupiter/V_filter/Brights/2023-11-01_21_38_05Z/']
+    elif letter.lower() == 'b' and 'b' not in colorkey:
+        colorkey += 'b'
+        img_paths += ['Jupiter/B_filter/Light/2023-11-01_21_31_34Z/']
+
+ncolor = len(colorkey)
+
 print('\n')
 ndraw = int(10**p)
-
-
-
-img_paths = ['Jupiter/B_filter/Light/2023-11-01_21_31_34Z/','Jupiter/R_filter/Brights/2023-11-01_21_35_05Z/','Jupiter/V_filter/Brights/2023-11-01_21_38_05Z/']
-out_paths = ['Blues','Reds','Greens']
 color_img = [[[0,0,0] for i in range(2 * scl)] for j in range(2 * scl)]
 color_channels = [] 
 
 for i,img_path in enumerate(img_paths):
-    print('working on',out_paths[i].lower(),'...')
-    names = [img_path + img_name for e,img_name in enumerate(os.listdir(img_path)) if fnmatch.fnmatch(img_name,'Light_*.fit') and e < nfetch]
+    print('working on',l2n[colorkey[i]]+'...')
+    names = [img_path + img_name for e,img_name in enumerate(os.listdir(img_path)) if fnmatch.fnmatch(img_name,'Light_*.fit') and (e < nfetch or not nfetch)]
     print('fetched %s file(s)'%(len(names)))
     snimgs = []
     
@@ -98,26 +112,30 @@ for i,img_path in enumerate(img_paths):
         snimg = nimg[x - scl:x + scl, y - scl:y+scl]
         snimgs += [snimg]
         
-        del nimg
+        del nimg,cimg,ncimg,snimg
 
         
     snimgs = np.array(snimgs)
     master_snimgs = snimgs.mean(axis = 0)
     color_channels += [np.asarray(master_snimgs)]
-    print('done with',out_paths[i].lower(),'\n')
-
-
+    print('done with',l2n[colorkey[i]],'\n')
+    del snimgs, master_snimgs
 
 
 for i in range(2 * scl):
     for j in range(2 * scl):
-        color_img[i][j][0] = int(255 * color_channels[1][i][j] ** 2)
-        color_img[i][j][1] = int(255 * color_channels[2][i][j] ** 2)
-        color_img[i][j][2] = int(255 * color_channels[0][i][j] ** 2)
+        color = []
+        for c in range(ncolor):
+            color += [color_channels[c][i][j]]
+            
+        for c in range(ncolor):
+            color_img[i][j][c] = int(255 * color[c] ** 2)
+            
+        del color
+
      
 
-
-out_name = 'img%s_pow%s-%s.png'%(nfetch,int(p),int(round(p%1,1) * 10))
+out_name = 'Pics/jupiter_bin%s_pow%s-%s_%s.png'%(nfetch,int(p),int(round(p%1,1) * 10),colorkey)
 plt.imsave(out_name,np.uint8(np.array(color_img)))
 print('color image saved as',out_name)
 
