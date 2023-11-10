@@ -112,7 +112,7 @@ for i,img_path in enumerate(img_paths):
         snimg = nimg[x - scl:x + scl, y - scl:y+scl]
         snimgs += [snimg]
         
-        del nimg,cimg,ncimg,snimg
+        del nimg,cimg,ncimg,snimg,xs
 
         
     snimgs = np.array(snimgs)
