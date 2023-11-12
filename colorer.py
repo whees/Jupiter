@@ -51,7 +51,7 @@ def center(img,n_draw = 500_000, u_thresh = 1,l_thresh = 0.5):
     for j in range(2):
         ret[j] /= len(xs)
         
-    return ret[0],ret[1],xs
+    return ret[0],ret[1]
     
 
 #binned arrays are easier to use for center detection
@@ -66,6 +66,7 @@ nfetch = int(input('no. images per color channel: '))
 p = float(input('centering power (ideal ~6): '))
 #maps color letter to color name
 l2n = {'r':'reds','b':'blues','g':'greens'}
+l2d = {'r':0,'g':1,'b':2}
 
 colorkey = ''
 img_paths = []
@@ -87,6 +88,7 @@ ndraw = int(10**p)
 color_img = [[[0,0,0] for i in range(2 * scl)] for j in range(2 * scl)]
 color_channels = [] 
 
+
 for i,img_path in enumerate(img_paths):
     print('working on',l2n[colorkey[i]]+'...')
     names = [img_path + img_name for e,img_name in enumerate(os.listdir(img_path)) if fnmatch.fnmatch(img_name,'Light_*.fit') and (e < nfetch or not nfetch)]
@@ -98,21 +100,14 @@ for i,img_path in enumerate(img_paths):
         cimg = compress(nimg,bin_size = binsize)
         ncimg = normalize(cimg)
         
-        x,y,xs = center(ncimg,n_draw = ndraw)
-        
-        
-        """ uncomment to check if center detection is picking up noise
-        xs = np.array(xs)
-        plt.scatter(xs[:,0], xs[:,1])
-        plt.show()
-        """
-        
+        x,y = center(ncimg,n_draw = ndraw)
         x,y = int(x*binsize),int(y*binsize)
 
         snimg = nimg[x - scl:x + scl, y - scl:y+scl]
         snimgs += [snimg]
         
-        del nimg,cimg,ncimg,snimg,xs
+        
+        del nimg,cimg,ncimg,snimg
 
         
     snimgs = np.array(snimgs)
@@ -124,15 +119,14 @@ for i,img_path in enumerate(img_paths):
 
 for i in range(2 * scl):
     for j in range(2 * scl):
-        color = []
+        color = [0,0,0]
         for c in range(ncolor):
-            color += [color_channels[c][i][j]]
+            color[l2d[colorkey[c]]] += color_channels[c][i][j]
             
-        for c in range(ncolor):
+        for c in range(3):
             color_img[i][j][c] = int(255 * color[c] ** 2)
             
         del color
-
      
 
 out_name = 'Pics/jupiter_bin%s_pow%s-%s_%s.png'%(nfetch,int(p),int(round(p%1,1) * 10),colorkey)
